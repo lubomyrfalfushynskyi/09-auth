@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const body = await request.json();
