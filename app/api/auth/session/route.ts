@@ -8,25 +8,17 @@ import { logErrorResponse } from "../../_utils/utils";
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const refreshToken = cookieStore.get("refreshToken")?.value;
 
-    if (accessToken) {
+    if (cookieStore.get("accessToken")) {
       return NextResponse.json({ success: true });
     }
 
-    if (refreshToken) {
-      const accessToken = cookieStore.get("accessToken")?.value;
-      const refreshTokenValue = cookieStore.get("refreshToken")?.value;
-
-      const axios = (await import('axios')).default.create({
-        baseURL: 'https://notehub-api.goit.study',
+    if (cookieStore.get("refreshToken")) {
+      const apiRes = await api.get("auth/session", {
         headers: {
-          Cookie: `accessToken=${accessToken}; refreshToken=${refreshTokenValue}`,
+          Cookie: cookieStore.toString(),
         },
       });
-
-      const apiRes = await axios.get("/auth/session");
 
       const setCookie = apiRes.headers["set-cookie"];
 
@@ -36,9 +28,9 @@ export async function GET() {
           const parsed = parse(cookieStr);
 
           const options = {
-            expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
-            path: parsed.Path,
-            maxAge: Number(parsed["Max-Age"]),
+            Expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
+            Path: parsed.Path,
+            "Max-Age": Number(parsed["Max-Age"]),
           };
 
           if (parsed.accessToken)

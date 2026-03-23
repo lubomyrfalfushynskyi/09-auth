@@ -77,8 +77,6 @@ export const getMe = async (): Promise<{
 
 interface UpdateMeData {
   username?: string;
-  email?: string;
-  avatar?: string;
 }
 
 export const updateMe = async (data: UpdateMeData): Promise<{

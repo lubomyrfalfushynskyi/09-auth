@@ -1,57 +1,64 @@
+import axios from 'axios';
 import { cookies } from 'next/headers';
+import { Note } from '@/types/note';
+import type { User } from '@/types/user';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
   ? process.env.NEXT_PUBLIC_API_URL + '/api'
   : 'http://localhost:3000/api';
 
-async function fetchFromAPI(endpoint: string, options?: RequestInit) {
-  const cookieStore = await cookies();
-  const cookieHeader = cookieStore.toString();
-
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers: {
-      ...options?.headers,
-      Cookie: cookieHeader,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
-  }
-
-  return response.json();
+export interface NotesResponse {
+  notes: Note[];
+  totalPages: number;
 }
 
-// Notes
 export const fetchNotes = async (params?: {
   search?: string;
   page?: number;
   perPage?: number;
   tag?: string;
-}) => {
-  const queryString = new URLSearchParams();
-  if (params?.search) queryString.append('search', params.search);
-  if (params?.page) queryString.append('page', params.page.toString());
-  if (params?.perPage) queryString.append('perPage', params.perPage.toString());
-  if (params?.tag) queryString.append('tag', params.tag);
-
-  const endpoint = queryString.toString()
-    ? `/notes?${queryString.toString()}`
-    : '/notes';
-
-  return fetchFromAPI(endpoint);
+}): Promise<NotesResponse> => {
+  const cookieStore = cookies();
+  const { data } = await axios.get<NotesResponse>('/notes', {
+    baseURL: API_URL,
+    params,
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return data;
 };
 
-export const fetchNoteById = async (id: string) => {
-  return fetchFromAPI(`/notes/${id}`);
+export const fetchNoteById = async (id: string): Promise<Note> => {
+  const cookieStore = cookies();
+  const { data } = await axios.get<Note>(`/notes/${id}`, {
+    baseURL: API_URL,
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return data;
 };
 
-// Auth
-export const getMe = async () => {
-  return fetchFromAPI('/users/me');
+export const getMe = async (): Promise<User> => {
+  const cookieStore = cookies();
+  const { data } = await axios.get<User>('/users/me', {
+    baseURL: API_URL,
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return data;
 };
 
-export const checkSession = async () => {
-  return fetchFromAPI('/auth/session');
+export const checkSession = async (): Promise<User | null> => {
+  const cookieStore = cookies();
+  const { data } = await axios.get<User | null>('/auth/session', {
+    baseURL: API_URL,
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+  return data;
 };
+

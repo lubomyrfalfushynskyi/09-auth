@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { checkSession } from '@/lib/api/serverApi';
 
 const publicRoutes = ['/sign-in', '/sign-up'];
 const privateRoutes = ['/profile', '/notes'];
@@ -10,10 +11,21 @@ export async function proxy(request: NextRequest) {
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
   const isPrivateRoute = privateRoutes.some(route => pathname.startsWith(route));
 
-  // Check for auth cookies
   const accessToken = request.cookies.get('accessToken');
   const refreshToken = request.cookies.get('refreshToken');
-  const isAuthenticated = accessToken || refreshToken;
+  let isAuthenticated = accessToken || refreshToken;
+
+  // If no accessToken but has refreshToken, try to refresh session
+  if (!accessToken && refreshToken) {
+    try {
+      const user = await checkSession();
+      if (user) {
+        isAuthenticated = true;
+      }
+    } catch (error) {
+      // Session refresh failed, continue as unauthenticated
+    }
+  }
 
   if (isPrivateRoute && !isAuthenticated) {
     return NextResponse.redirect(new URL('/sign-in', request.url));
@@ -27,5 +39,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/profile/:path*', '/notes/:path*', '/sign-in', '/sign-up'],
 };
