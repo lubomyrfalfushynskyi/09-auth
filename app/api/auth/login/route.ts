@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
         const parsed = parse(cookieStr);
 
         const options = {
-          Expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
-          Path: parsed.Path,
-          'Max-Age': Number(parsed['Max-Age']),
+          expires: parsed.Expires ? new Date(parsed.Expires) : undefined,
+          path: parsed.Path,
+          maxAge: Number(parsed['Max-Age']),
         };
         if (parsed.accessToken) cookieStore.set('accessToken', parsed.accessToken, options);
         if (parsed.refreshToken) cookieStore.set('refreshToken', parsed.refreshToken, options);
