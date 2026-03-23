@@ -16,9 +16,11 @@ export async function GET() {
     }
 
     if (refreshToken) {
+      const accessToken = cookieStore.get("accessToken")?.value;
+      const refreshTokenValue = cookieStore.get("refreshToken")?.value;
       const apiRes = await api.get("/auth/session", {
         headers: {
-          Cookie: cookieStore.toString(),
+          Cookie: `accessToken=${accessToken}; refreshToken=${refreshTokenValue}`,
         },
       });
 

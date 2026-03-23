@@ -12,9 +12,11 @@ export async function GET(request: Request, { params }: Props) {
   try {
     const cookieStore = await cookies();
     const { id } = await params;
-    const res = await api(`/notes/${id}`, {
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
+    const res = await api.get(`/notes/${id}`, {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
     return NextResponse.json(res.data, { status: res.status });
@@ -35,10 +37,12 @@ export async function DELETE(request: Request, { params }: Props) {
   try {
     const cookieStore = await cookies();
     const { id } = await params;
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
     const res = await api.delete(`/notes/${id}`, {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
     return NextResponse.json(res.data, { status: res.status });
@@ -60,10 +64,12 @@ export async function PATCH(request: Request, { params }: Props) {
     const cookieStore = await cookies();
     const { id } = await params;
     const body = await request.json();
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
     const res = await api.patch(`/notes/${id}`, body, {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
     return NextResponse.json(res.data, { status: res.status });

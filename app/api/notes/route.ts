@@ -11,6 +11,8 @@ export async function GET(request: NextRequest) {
     const page = Number(request.nextUrl.searchParams.get('page') ?? 1);
     const rawTag = request.nextUrl.searchParams.get('tag') ?? '';
     const tag = rawTag === 'All' ? '' : rawTag;
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
     const res = await api.get('/notes', {
       params: {
@@ -20,7 +22,7 @@ export async function GET(request: NextRequest) {
         ...(tag && { tag }),
       },
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
 
@@ -41,12 +43,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-
     const body = await request.json();
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
     const res = await api.post('/notes', body, {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
         'Content-Type': 'application/json',
       },
     });

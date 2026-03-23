@@ -9,10 +9,12 @@ import { isAxiosError } from 'axios';
 export async function GET() {
   try {
     const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
     const res = await api.get('/users/me', {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
     return NextResponse.json(res.data, { status: res.status });
@@ -33,10 +35,12 @@ export async function PATCH(request: Request) {
   try {
     const cookieStore = await cookies();
     const body = await request.json();
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
     const res = await api.patch('/users/me', body, {
       headers: {
-        Cookie: cookieStore.toString(),
+        Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
     return NextResponse.json(res.data, { status: res.status });
