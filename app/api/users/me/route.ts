@@ -6,17 +6,21 @@ import { cookies } from 'next/headers';
 import { logErrorResponse } from '../../_utils/utils';
 import { isAxiosError } from 'axios';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    const res = await api.get('/users/me', {
+    // Create axios instance without withCredentials to manually pass cookies
+    const axios = (await import('axios')).default.create({
+      baseURL: 'https://notehub-api.goit.study',
       headers: {
         Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
+
+    const res = await axios.get('/users/me');
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
     if (isAxiosError(error)) {
@@ -38,11 +42,15 @@ export async function PATCH(request: Request) {
     const accessToken = cookieStore.get('accessToken')?.value;
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    const res = await api.patch('/users/me', body, {
+    // Create axios instance without withCredentials to manually pass cookies
+    const axios = (await import('axios')).default.create({
+      baseURL: 'https://notehub-api.goit.study',
       headers: {
         Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
+
+    const res = await axios.patch('/users/me', body);
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
     if (isAxiosError(error)) {

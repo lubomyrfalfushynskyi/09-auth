@@ -7,15 +7,17 @@ import { logErrorResponse } from '../../_utils/utils';
 export async function POST() {
   try {
     const cookieStore = await cookies();
-
     const accessToken = cookieStore.get('accessToken')?.value;
     const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    await api.post('/auth/logout', null, {
+    const axios = (await import('axios')).default.create({
+      baseURL: 'https://notehub-api.goit.study',
       headers: {
         Cookie: `accessToken=${accessToken}; refreshToken=${refreshToken}`,
       },
     });
+
+    await axios.post('/auth/logout');
 
     cookieStore.delete('accessToken');
     cookieStore.delete('refreshToken');

@@ -18,11 +18,15 @@ export async function GET() {
     if (refreshToken) {
       const accessToken = cookieStore.get("accessToken")?.value;
       const refreshTokenValue = cookieStore.get("refreshToken")?.value;
-      const apiRes = await api.get("/auth/session", {
+
+      const axios = (await import('axios')).default.create({
+        baseURL: 'https://notehub-api.goit.study',
         headers: {
           Cookie: `accessToken=${accessToken}; refreshToken=${refreshTokenValue}`,
         },
       });
+
+      const apiRes = await axios.get("/auth/session");
 
       const setCookie = apiRes.headers["set-cookie"];
 
